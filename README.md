@@ -1,20 +1,62 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# CentiCare HIS
 
-# Run and deploy your AI Studio app
+Professional Hospital Information System (HIS) dashboard for managing clinical surveillance, pharmacy inventory, and patient medical records.
 
-This contains everything you need to run your app locally.
+## 🏥 Key Features
 
-View your app in AI Studio: https://ai.studio/apps/79d03a70-0cc3-4388-b57a-fd18bf95eea1
+- **Clinical Surveillance**: Real-time patient monitoring with SBAR, IV sheets, and laboratory tracking.
+- **Nursing Kardex**: Advanced task management for shift handovers and critical care workflows.
+- **Interactive Ward Map**: Visual bed management with real-time status indicators.
+- **Pharmacy & Inventory**: Comprehensive stock tracking with crash cart management and emergency medicine monitoring.
+- **Secure Medical Charts**: HIPAA-ready audit logs and imaging/radiology reporting.
+- **Staff Accounts**: Individual profile management with tiered permissions.
 
-## Run Locally
+## 🚀 Tech Stack
 
-**Prerequisites:**  Node.js
+- **Frontend**: React 19 + TypeScript
+- **Styling**: Tailwind CSS 4
+- **Animations**: Framer Motion
+- **Icons**: Lucide React
+- **Build Tool**: Vite
 
+## 🛠️ Getting Started
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/centicare-his.git
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+### Building for Production
+
+To create an optimized production build:
+
+```bash
+npm run build
+```
+
+The output will be in the `dist/` directory, ready to be hosted on any static site hosting service (GitHub Pages, Vercel, Netlify, Cloud Run).
+
+## 📄 License
+
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+
+## 🛡️ Security Note
+
+This is a clinical dashboard frontend. Ensure proper backend authentication and data encryption are implemented before using with real patient data.
