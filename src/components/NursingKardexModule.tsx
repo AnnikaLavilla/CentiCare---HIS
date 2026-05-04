@@ -15,6 +15,10 @@ export const NursingKardexModule: React.FC = () => {
     (task.patientName.toLowerCase().includes(searchTerm.toLowerCase()) || task.task.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   const toggleStatus = (id: string) => {
     setTasks(prev => prev.map(t => {
       if (t.id === id) {
@@ -153,8 +157,11 @@ export const NursingKardexModule: React.FC = () => {
                 <span className="text-sm font-medium text-slate-400">Next Vitals Round</span>
                 <span className="text-xs font-mono font-bold text-emerald-400">11:00 AM</span>
               </div>
-              <div className="pt-6 border-t border-white/10">
-                <button className="w-full py-4 bg-brand rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-brand/20 hover:scale-[1.02] transition-all">
+              <div className="pt-6 border-t border-white/10 no-print">
+                <button 
+                  onClick={handlePrint}
+                  className="w-full py-4 bg-brand rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-brand/20 hover:scale-[1.02] transition-all"
+                >
                   Generate End-of-Shift Report
                 </button>
               </div>

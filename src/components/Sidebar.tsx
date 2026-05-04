@@ -17,6 +17,7 @@ import {
   X,
   ClipboardList,
   Map,
+  MessageSquare,
   Pill
 } from 'lucide-react';
 import { TabType } from '../types';
@@ -38,13 +39,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLog
     { id: 'patients', label: 'Patients', icon: Users, section: 'Master Files' },
     { id: 'hmo', label: 'HMO / Guarantors', icon: ShieldCheck, section: 'Master Files' },
     { id: 'pharmacy', label: 'Pharmacy/Inventory', icon: Pill, section: 'Master Files' },
-    { id: 'account', label: 'My Account', icon: User, section: 'Master Files' },
     { id: 'emergency', label: 'Emergency', icon: Activity, section: 'Transactions' },
     { id: 'outpatient', label: 'Outpatient', icon: UserPlus, section: 'Transactions' },
     { id: 'inpatient', label: 'Inpatient', icon: Bed, section: 'Transactions' },
+    { id: 'messages', label: 'Physician Messaging', icon: MessageSquare, section: 'Communication' },
+    { id: 'account', label: 'My Account', icon: User, section: 'Communication' },
   ];
 
   const sections = ['Overview', 'Master Files', 'Transactions'];
+  const footerItems = menuItems.filter(item => item.section === 'Communication');
 
   return (
     <div className={cn(
@@ -59,7 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLog
       </div>
 
       <div className="flex-1 overflow-y-auto py-4">
-        {sections.map(section => (
+        {sections.filter(s => s !== 'Communication').map(section => (
           <div key={section} className="mb-6">
             {isOpen && <p className="px-6 text-[10px] font-bold text-emerald-500/50 uppercase tracking-widest mb-3">{section}</p>}
             <ul>
@@ -87,13 +90,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onLog
         ))}
       </div>
 
-      <div className="p-4 border-t border-brand-hover/30">
+      <div className="p-2 border-t border-brand-hover/30 space-y-1">
+        {footerItems.map(item => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id as TabType)}
+              className={cn(
+                "w-full flex items-center px-6 py-3 transition-all text-sm rounded-xl",
+                activeTab === item.id 
+                  ? "bg-brand text-white shadow-lg" 
+                  : "hover:bg-brand/20 hover:text-emerald-50"
+              )}
+            >
+              <Icon size={18} className={cn(isOpen ? "mr-4" : "mx-auto")} />
+              {isOpen && <span className="text-[10px] font-black uppercase tracking-wide whitespace-nowrap">{item.label}</span>}
+            </button>
+          );
+        })}
+        
         <button 
           onClick={onLogout}
-          className="w-full flex items-center px-4 py-3 hover:bg-red-500/10 rounded-xl transition-colors text-slate-500 hover:text-red-400 group"
+          className="w-full flex items-center px-6 py-3 hover:bg-red-500/10 rounded-xl transition-colors text-slate-500 hover:text-red-400 group mt-2"
         >
           <LogOut size={18} className={cn(isOpen ? "mr-4" : "mx-auto", "group-hover:rotate-12 transition-transform")} />
-          {isOpen && <span className="text-sm font-bold">Log out</span>}
+          {isOpen && <span className="text-[10px] font-black uppercase tracking-wide">Log out</span>}
         </button>
       </div>
     </div>

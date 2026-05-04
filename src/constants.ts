@@ -6,19 +6,19 @@
 import { Patient, InventoryItem, KardexTask } from './types';
 
 export const INVENTORY_ITEMS: InventoryItem[] = [
-  { id: 'EMER-001', name: 'Epinephrine 1mg/mL', category: 'Medicine', stock: 15, unit: 'Vials', expiryDate: '2026-12-01', status: 'In Stock' },
-  { id: 'EMER-002', name: 'Amiodarone 150mg', category: 'Medicine', stock: 8, unit: 'Ampules', expiryDate: '2026-08-15', status: 'In Stock' },
-  { id: 'EMER-003', name: 'Atropine Sulfate 1mg', category: 'Medicine', stock: 12, unit: 'Vials', expiryDate: '2027-01-10', status: 'In Stock' },
-  { id: 'EMER-004', name: 'Adenosine 6mg/2mL', category: 'Medicine', stock: 4, unit: 'Vials', expiryDate: '2026-11-20', status: 'Low Stock' },
-  { id: 'EMER-005', name: 'Sodium Bicarbonate 8.4%', category: 'Medicine', stock: 10, unit: 'Prefilled Syringe', expiryDate: '2026-10-01', status: 'In Stock' },
-  { id: 'CART-001', name: 'Intubation Kit (Adult)', category: 'Supply', stock: 2, unit: 'Sets', status: 'In Stock' },
-  { id: 'CART-002', name: 'Defibrillator Pads', category: 'Supply', stock: 4, unit: 'Pairs', status: 'In Stock' },
-  { id: 'CART-003', name: 'Laryngoscope Blade Set', category: 'Equipment', stock: 3, unit: 'Sets', status: 'In Stock' },
-  { id: 'MED-001', name: 'Paracetamol 500mg', category: 'Medicine', stock: 1250, unit: 'Tabs', expiryDate: '2027-12-31', status: 'In Stock' },
-  { id: 'MED-002', name: 'Amoxicillin 500mg', category: 'Medicine', stock: 45, unit: 'Caps', expiryDate: '2026-06-20', status: 'Low Stock' },
-  { id: 'SUP-001', name: 'Sterile Gauze 4x4', category: 'Supply', stock: 500, unit: 'Packs', status: 'In Stock' },
-  { id: 'SUP-002', name: 'Disposable Syringe 5cc', category: 'Supply', stock: 0, unit: 'Pcs', status: 'Out of Stock' },
-  { id: 'EQP-001', name: 'Digital Thermometer', category: 'Equipment', stock: 12, unit: 'Units', status: 'In Stock' }
+  { id: 'EMER-001', name: 'Epinephrine 1mg/mL', category: 'Medicine', stock: 15, unit: 'Vials', expiryDate: '2026-12-01', status: 'In Stock', lowStockThreshold: 10 },
+  { id: 'EMER-002', name: 'Amiodarone 150mg', category: 'Medicine', stock: 8, unit: 'Ampules', expiryDate: '2026-08-15', status: 'In Stock', lowStockThreshold: 10 },
+  { id: 'EMER-003', name: 'Atropine Sulfate 1mg', category: 'Medicine', stock: 12, unit: 'Vials', expiryDate: '2027-01-10', status: 'In Stock', lowStockThreshold: 5 },
+  { id: 'EMER-004', name: 'Adenosine 6mg/2mL', category: 'Medicine', stock: 4, unit: 'Vials', expiryDate: '2026-11-20', status: 'Low Stock', lowStockThreshold: 10 },
+  { id: 'EMER-005', name: 'Sodium Bicarbonate 8.4%', category: 'Medicine', stock: 10, unit: 'Prefilled Syringe', expiryDate: '2026-10-01', status: 'In Stock', lowStockThreshold: 5 },
+  { id: 'CART-001', name: 'Intubation Kit (Adult)', category: 'Supply', stock: 2, unit: 'Sets', status: 'In Stock', lowStockThreshold: 1 },
+  { id: 'CART-002', name: 'Defibrillator Pads', category: 'Supply', stock: 4, unit: 'Pairs', status: 'In Stock', lowStockThreshold: 2 },
+  { id: 'CART-003', name: 'Laryngoscope Blade Set', category: 'Equipment', stock: 3, unit: 'Sets', status: 'In Stock', lowStockThreshold: 1 },
+  { id: 'MED-001', name: 'Paracetamol 500mg', category: 'Medicine', stock: 1250, unit: 'Tabs', expiryDate: '2027-12-31', status: 'In Stock', lowStockThreshold: 100 },
+  { id: 'MED-002', name: 'Amoxicillin 500mg', category: 'Medicine', stock: 45, unit: 'Caps', expiryDate: '2026-06-20', status: 'Low Stock', lowStockThreshold: 50 },
+  { id: 'SUP-001', name: 'Sterile Gauze 4x4', category: 'Supply', stock: 500, unit: 'Packs', status: 'In Stock', lowStockThreshold: 50 },
+  { id: 'SUP-002', name: 'Disposable Syringe 5cc', category: 'Supply', stock: 0, unit: 'Pcs', status: 'Out of Stock', lowStockThreshold: 100 },
+  { id: 'EQP-001', name: 'Digital Thermometer', category: 'Equipment', stock: 12, unit: 'Units', status: 'In Stock', lowStockThreshold: 5 }
 ];
 
 export const KARDEX_TASKS: KardexTask[] = [
@@ -295,11 +295,42 @@ export const INITIAL_PATIENTS: Patient[] = [
     discharge: "-",
     ward: "ER Isolation",
     age: 62,
-    diagnosis: "Suspected Pneumonia",
+    diagnosis: "Head Fracture - Skull Base Laceration",
     locked: false,
     demographics: { address: "Davao City", phone: "0917-888-9999", civilStatus: "Married", religion: "Catholic", nationality: "Filipino" },
     registry: { caseNumber: "CN-2026-ER02", hmo: "PhilHealth", attendingPhysician: "Dr. Dela", admissionSource: "Self-Referral" },
-    medicalRecord: { medications: [], doctorOrders: [], vitals: [], intakeOutput: { intake: [], output: [] }, ivSheet: [], labs: [] }
+    medicalRecord: {
+      medications: [
+        {
+          dateTime: "May 1, 2026 – 08:30",
+          medication: "Mannitol 20%",
+          dose: "100g",
+          route: "IV Infusion",
+          frequency: "STAT",
+          indication: "To decrease intracranial pressure",
+          nursingResponsibility: "Monitor urine output, BP and neurological status"
+        }
+      ],
+      doctorOrders: [
+        { dateTime: "May 1, 2026", order: "STAT Cranial CT Scan", rationale: "To assess extent of fracture and bleeding" },
+        { dateTime: "08:45", order: "Monitor GCS q15", rationale: "To detect neurological deterioration" }
+      ],
+      vitals: [
+        { time: "08:00 AM", bp: "150/90", rr: "18", hr: 62, temp: "37.2", remarks: "Patient confused, c/o severe headache" }
+      ],
+      imaging: [
+        {
+          date: "May 1, 2026 - 09:00",
+          type: "CT Scan",
+          procedure: "Cranial CT (Non-Contrast)",
+          findings: "Linear fracture on the right parietal bone. Small epidural hematoma.",
+          impression: "Skull Fracture with associated hematoma."
+        }
+      ],
+      intakeOutput: { intake: [], output: [] },
+      ivSheet: [],
+      labs: []
+    }
   },
   {
     id: "ER-002005",
@@ -343,11 +374,30 @@ export const INITIAL_PATIENTS: Patient[] = [
     discharge: "2026-05-01",
     ward: "Dermatology",
     age: 29,
-    diagnosis: "Allergic Rhinitis",
+    diagnosis: "Severe Acne / Dermatitis Flare-up",
     locked: false,
     demographics: { address: "Quezon City", phone: "0908-777-6666", civilStatus: "Single", religion: "Catholic", nationality: "Filipino" },
     registry: { caseNumber: "CN-2026-OP02", hmo: "MediCard", attendingPhysician: "Dr. Co", admissionSource: "Self-Referral" },
-    medicalRecord: { medications: [], doctorOrders: [], vitals: [], intakeOutput: { intake: [], output: [] }, ivSheet: [], labs: [] }
+    medicalRecord: {
+      medications: [
+        {
+          dateTime: "May 1, 2026",
+          medication: "Hydrocortisone Cream",
+          dose: "Thin layer",
+          route: "Topical",
+          frequency: "BID",
+          indication: "For inflammation",
+          nursingResponsibility: "Apply on affected areas only"
+        }
+      ],
+      doctorOrders: [
+        { dateTime: "May 1, 2026", order: "Follow up in 2 weeks", rationale: "Evaluate treatment response" }
+      ],
+      vitals: [],
+      intakeOutput: { intake: [], output: [] },
+      ivSheet: [],
+      labs: []
+    }
   },
   {
     id: "OP-003008",

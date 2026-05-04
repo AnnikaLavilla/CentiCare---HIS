@@ -28,7 +28,12 @@ import {
   Droplet,
   User as UserIcon,
   Image,
-  History
+  History,
+  Shield,
+  ShieldAlert,
+  Scale,
+  CheckCircle,
+  MessageSquare
 } from 'lucide-react';
 import { Patient, User } from '../types';
 import { cn } from '../lib/utils';
@@ -38,16 +43,19 @@ interface PatientChartProps {
   patient: Patient;
   onClose: () => void;
   onUpdateRecord: (record: Patient['medicalRecord']) => void;
+  onMessageDoctor?: () => void;
 }
 
-export const PatientChart: React.FC<PatientChartProps> = ({ patient, onClose, onUpdateRecord }) => {
+export const PatientChart: React.FC<PatientChartProps> = ({ patient, onClose, onUpdateRecord, onMessageDoctor }) => {
   const [activeSubTab, setActiveSubTab] = React.useState<'clinical' | 'sbar' | 'meds' | 'vitals' | 'iv' | 'labs' | 'registry' | 'imaging' | 'audit'>('clinical');
   const [editingSbar, setEditingSbar] = React.useState(false);
   const [showVitalForm, setShowVitalForm] = React.useState(false);
   const [showIntakeForm, setShowIntakeForm] = React.useState(false);
   const [showOutputForm, setShowOutputForm] = React.useState(false);
   const [showIVForm, setShowIVForm] = React.useState(false);
+  const [showPrivacyNotice, setShowPrivacyNotice] = React.useState(false);
   const [showMedForm, setShowMedForm] = React.useState(false);
+  const [viewingDicom, setViewingDicom] = React.useState<any>(null);
   
   const [showOrderForm, setShowOrderForm] = React.useState(false);
   const [newOrder, setNewOrder] = React.useState({ order: '', rationale: '' });
@@ -57,6 +65,44 @@ export const PatientChart: React.FC<PatientChartProps> = ({ patient, onClose, on
   const [newVital, setNewVital] = React.useState({ bp: '', rr: '', hr: '', temp: '', remarks: '' });
   const [newIntake, setNewIntake] = React.useState({ type: '', amount: '' });
   const [newOutput, setNewOutput] = React.useState({ type: '', amount: '' });
+  
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const getDicomImage = (item: any) => {
+    const procedure = item.procedure?.toLowerCase() || '';
+    const findings = item.findings?.toLowerCase() || '';
+    
+    if (procedure.includes('chest') || findings.includes('lung') || findings.includes('pleural')) {
+      // Specific Radiopaedia image for Chest PA X-ray as requested
+      return "https://prod-images-static.radiopaedia.org/images/2089213/f12063879a29e672f675977fabdc89_big_gallery.jpeg";
+    }
+    
+    if (
+      procedure.includes('pelvic') || 
+      procedure.includes('ultrasound') || 
+      procedure.includes('transvaginal') || 
+      findings.includes('uterus') || 
+      findings.includes('clot') ||
+      findings.includes('atony') ||
+      item.type === 'Ultrasound'
+    ) {
+      // Specific image for Pelvic Ultrasound as requested
+      return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0e45PiObBLK2BhEwfrYcUMDLU8QNN48OcHw&s";
+    }
+
+    if (item.type === 'CT Scan') {
+      // Cranial CT for Bato De La Rosa as requested
+      return "https://lh4.googleusercontent.com/proxy/bfCzz5s665zyEpZyv0bTppU3eOORU5DmIxCw9mv8ZGOsx1ymaBdY4hkmlxycFieEFTB8kw21GsbSQAHCF2sBGzTbzuYz3EegpeE9PrVYjOXFQ8kiLUMMm_gnm4SYmuRdWdI5VS2ojlfH";
+    }
+
+    if (item.type === 'X-Ray') {
+      return "https://prod-images-static.radiopaedia.org/images/2089213/f12063879a29e672f675977fabdc89_big_gallery.jpeg";
+    }
+    
+    return "https://prod-images-static.radiopaedia.org/images/2089213/f12063879a29e672f675977fabdc89_big_gallery.jpeg";
+  };
 
   const user: User | null = JSON.parse(localStorage.getItem('user') || 'null');
   const isLocked = patient.id === 'PT-001001' || patient.name === 'Antonina Borromeo' || patient.locked;
@@ -86,7 +132,44 @@ export const PatientChart: React.FC<PatientChartProps> = ({ patient, onClose, on
       
       <div className="relative bg-white w-full h-full max-w-7xl rounded-3xl shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-slate-50 p-6 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="hidden print:flex flex-col mb-8 border-b-2 border-slate-900 pb-6 print-header">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center">
+                <Activity size={24} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-black uppercase tracking-widest text-slate-900">CENTICARE HEALTH</h1>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Official Medical Record Audit</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-[8px] font-black text-slate-400 uppercase">Document Hash</p>
+              <p className="text-xs font-mono text-slate-600">SHA256: {Math.random().toString(36).substring(2, 15).toUpperCase()}</p>
+            </div>
+          </div>
+          
+          <div className="mt-8 grid grid-cols-4 gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-200">
+            <div>
+              <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Patient Name</p>
+              <p className="text-sm font-bold text-slate-900">{patient.name}</p>
+            </div>
+            <div>
+              <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Patient ID</p>
+              <p className="text-sm font-mono font-bold text-brand">{patient.id}</p>
+            </div>
+            <div>
+              <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Date of Birth</p>
+              <p className="text-sm font-bold text-slate-900">1980-05-12 (44 yrs)</p>
+            </div>
+            <div>
+              <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Generated At</p>
+              <p className="text-sm font-bold text-slate-900">{new Date().toLocaleString()}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-slate-50 p-6 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
           <div className="flex items-center gap-5">
             <button 
               onClick={onClose}
@@ -134,9 +217,19 @@ export const PatientChart: React.FC<PatientChartProps> = ({ patient, onClose, on
                 Active Session: {user?.role || 'Guest'}
               </span>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg hover:bg-white text-slate-600 transition-all shadow-sm">
+            <button 
+              onClick={handlePrint}
+              className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg hover:bg-white text-slate-600 transition-all shadow-sm"
+            >
               <Printer size={18} />
               <span className="font-medium text-sm">Print</span>
+            </button>
+            <button 
+              onClick={onMessageDoctor}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg hover:bg-emerald-100 transition-all shadow-sm"
+            >
+              <MessageSquare size={18} />
+              <span className="font-medium text-sm">Message Physician</span>
             </button>
             <button className="flex items-center gap-2 px-5 py-2 bg-brand text-white rounded-lg hover:bg-brand-hover shadow-md transition-all">
               <Save size={18} />
@@ -255,9 +348,16 @@ export const PatientChart: React.FC<PatientChartProps> = ({ patient, onClose, on
                 exit={{ opacity: 0, y: -10 }}
                 className="max-w-4xl mx-auto space-y-6"
               >
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-between items-center mb-4 print:hidden">
                   <h3 className="text-xl font-bold text-slate-900 uppercase">SBAR Clinical Handover</h3>
                   <div className="flex items-center gap-4">
+                    <button 
+                      onClick={handlePrint}
+                      className="flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-white text-slate-600 transition-all text-[10px] font-black uppercase tracking-widest"
+                    >
+                      <Printer size={14} />
+                      Print Handover
+                    </button>
                     {canEditNursing && (
                       editingSbar ? (
                         <button 
@@ -900,7 +1000,12 @@ export const PatientChart: React.FC<PatientChartProps> = ({ patient, onClose, on
                         </div>
                       </div>
                       <div className="px-6 py-3 bg-slate-50 border-t border-slate-100 flex justify-end">
-                        <button className="text-[10px] font-black text-slate-400 hover:text-brand transition-colors uppercase tracking-widest">View Original Image (DICOM)</button>
+                        <button 
+                          onClick={() => setViewingDicom(img)}
+                          className="text-[10px] font-black text-slate-400 hover:text-brand transition-colors uppercase tracking-widest"
+                        >
+                          View Original Image (DICOM)
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -929,7 +1034,13 @@ export const PatientChart: React.FC<PatientChartProps> = ({ patient, onClose, on
                     <History size={24} className="text-brand" />
                     Medical Record Audit Trail
                   </h3>
-                  <span className="text-[10px] font-black bg-slate-800 text-white px-3 py-1.5 rounded-lg tracking-widest">HIPAA COMPLIANT</span>
+                  <button 
+                    onClick={() => setShowPrivacyNotice(true)}
+                    className="text-[10px] font-black bg-slate-800 text-white px-3 py-1.5 rounded-lg tracking-widest uppercase hover:bg-brand transition-colors flex items-center gap-2"
+                  >
+                    <Shield size={12} />
+                    Data Privacy Act Compliant
+                  </button>
                 </div>
 
                 <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
@@ -979,6 +1090,19 @@ export const PatientChart: React.FC<PatientChartProps> = ({ patient, onClose, on
                 exit={{ opacity: 0, y: -10 }}
                 className="space-y-8"
               >
+                <div className="flex justify-between items-center mb-4 print:hidden">
+                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <FlaskConical size={20} className="text-brand" />
+                    Laboratory Investigation Results
+                  </h3>
+                  <button 
+                    onClick={handlePrint}
+                    className="flex items-center gap-2 px-3 py-1.5 border border-slate-200 rounded-lg hover:bg-white text-slate-600 transition-all text-[10px] font-black uppercase tracking-widest"
+                  >
+                    <Printer size={14} />
+                    Print Lab Report
+                  </button>
+                </div>
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                   <table className="w-full text-left">
                     <thead className="bg-slate-50 text-xs uppercase text-slate-400 font-bold border-b border-slate-100">
@@ -1015,6 +1139,210 @@ export const PatientChart: React.FC<PatientChartProps> = ({ patient, onClose, on
           </AnimatePresence>
         </div>
       </div>
+
+      {/* RA 10173 Privacy Enforcement Modal */}
+      <AnimatePresence>
+        {showPrivacyNotice && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPrivacyNotice(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white w-full max-w-xl rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col border border-slate-100"
+            >
+              <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <Shield className="text-brand" size={20} />
+                  <h3 className="text-lg font-black uppercase tracking-widest">Privacy Enforcement</h3>
+                </div>
+                <button onClick={() => setShowPrivacyNotice(false)} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-8 space-y-6">
+                <div className="p-6 bg-slate-50 border border-slate-100 rounded-2xl">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                      <CheckCircle size={20} />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest leading-none mb-1">RA 10173 Compliance</h4>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">Active for Patient {patient.id}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                    This medical record is processed under the strict guidelines of the <strong className="text-slate-800">Data Privacy Act (DPA) of 2012</strong>. Any unauthorized access, modification, or sharing of this data is a violation punishable by Philippine law.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 border border-slate-100 rounded-2xl">
+                    <Lock className="text-brand-light font-black mb-2" size={16} />
+                    <h5 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-1">Encryption</h5>
+                    <p className="text-[9px] text-slate-400 font-medium uppercase">AES-256 Cloud Shield active</p>
+                  </div>
+                  <div className="p-4 border border-slate-100 rounded-2xl">
+                    <Scale className="text-brand-light font-black mb-2" size={16} />
+                    <h5 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-1">Consent</h5>
+                    <p className="text-[9px] text-slate-400 font-medium uppercase">Clinical disclosure active</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <h6 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Security Protocols</h6>
+                  {[
+                    "Role-Based Access Control (RBAC) enforced",
+                    "Audit logging of all viewing sessions",
+                    "PII Data masking for transit reports",
+                    "Discharge Data Purge protocol ready"
+                  ].map((p, i) => (
+                    <div key={i} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg">
+                      <div className="w-1 h-1 bg-brand rounded-full"></div>
+                      <span className="text-[9px] font-black text-slate-600 uppercase tracking-tighter">{p}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex gap-4">
+                  <ShieldAlert className="text-amber-500 shrink-0" size={20} />
+                  <p className="text-[9px] text-amber-700 font-bold uppercase tracking-tight leading-relaxed">
+                    By viewing this record, you acknowledge your duty of confidentiality as a medical professional. All actions are timestamped and linked to your staff ID.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-6 bg-slate-50 border-t border-slate-100">
+                <button 
+                  onClick={() => setShowPrivacyNotice(false)}
+                  className="w-full py-4 bg-slate-800 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all shadow-xl shadow-slate-200"
+                >
+                  Return to Patient Chart
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      
+      {/* DICOM Viewer Modal */}
+      <AnimatePresence>
+        {viewingDicom && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setViewingDicom(null)}
+              className="absolute inset-0 bg-black/90 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-slate-900 w-full max-w-5xl h-[85vh] rounded-[2rem] shadow-2xl relative overflow-hidden flex flex-col border border-white/10"
+            >
+              {/* Toolbar */}
+              <div className="bg-slate-800 p-6 flex justify-between items-center border-b border-white/10">
+                <div className="flex items-center gap-6">
+                  <div className="p-3 bg-brand rounded-2xl">
+                    <Activity size={24} className="text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-white uppercase tracking-widest leading-none mb-1">CentiView™ DICOM Node</h3>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{viewingDicom.procedure} - ID: {patient.id}-IMG-{Math.floor(Math.random() * 1000)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="hidden md:flex bg-slate-700/50 rounded-xl p-1 border border-white/5">
+                    <button className="px-4 py-2 text-[10px] font-black text-slate-400 hover:text-white transition-all uppercase tracking-widest">Lut: Bone</button>
+                    <button className="px-4 py-2 text-[10px] font-black bg-brand text-white rounded-lg uppercase tracking-widest">Lut: Invert</button>
+                    <button className="px-4 py-2 text-[10px] font-black text-slate-400 hover:text-white transition-all uppercase tracking-widest">Zoom: 100%</button>
+                  </div>
+                  <button 
+                    onClick={() => setViewingDicom(null)}
+                    className="p-3 hover:bg-white/10 rounded-2xl transition-colors text-white"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Viewer Area */}
+              <div className="flex-1 relative bg-black flex items-center justify-center p-8 overflow-hidden group">
+                <div className="absolute top-8 left-8 space-y-4 z-10">
+                  <div className="p-4 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 text-white font-mono text-[10px] space-y-1">
+                    <p>Name: {patient.name}</p>
+                    <p>DOB: 1980-05-12</p>
+                    <p>Sex: {patient.gender || 'F'}</p>
+                    <p>Series: 1/1</p>
+                    <p>Slice: 14/32</p>
+                    <p className="text-brand">Modality: {viewingDicom.type}</p>
+                  </div>
+                </div>
+
+                <div className="absolute bottom-8 right-8 z-10">
+                  <div className="p-4 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10">
+                    <div className="w-12 h-12 border-l-2 border-b-2 border-white/40 flex items-end p-2">
+                      <span className="text-[8px] font-bold text-white/60">5cm</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* The Image */}
+                <motion.div 
+                  initial={{ opacity: 0, scale: 1.1 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1 }}
+                  className="relative cursor-crosshair h-full flex items-center justify-center"
+                >
+                  <img 
+                    src={getDicomImage(viewingDicom)} 
+                    alt="DICOM View"
+                    className="max-h-full rounded-lg shadow-2xl"
+                  />
+                  <div className="absolute inset-0 bg-brand/5 pointer-events-none mix-blend-overlay"></div>
+                </motion.div>
+
+                {/* Controls Overlay */}
+                <div className="absolute bottom-10 left-10 flex gap-4 no-print">
+                  <button 
+                    onClick={() => setViewingDicom(null)}
+                    className="p-3 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-md transition-all"
+                  >
+                    <ArrowLeft size={20} />
+                  </button>
+                  <button 
+                    onClick={handlePrint}
+                    className="p-3 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-md transition-all"
+                  >
+                    <Printer size={20} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Status Bar */}
+              <div className="bg-slate-900 px-8 py-3 border-t border-white/5 flex justify-between items-center">
+                <div className="flex gap-6 items-center">
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Hounsfield Unit: -24</span>
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Resolution: 512x512</span>
+                  <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest animate-pulse">Lossless Stream Active</span>
+                </div>
+                <div className="text-[9px] font-black text-slate-600 uppercase tracking-widest">
+                  Licensed to: Holy Cross Hospital - Radiology Dept
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

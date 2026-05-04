@@ -6,3 +6,71 @@
   --color-brand-hover: #002b0e;
   --color-brand-sidebar: #01240c;
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+    font-family: serif !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+  
+  /* Hide UI elements */
+  aside, nav, .sidebar, .header, button, .no-print, [role="tablist"] {
+    display: none !important;
+  }
+  
+  /* Patient Chart Printing Optimization */
+  .fixed {
+    position: static !important;
+  }
+  
+  .backdrop-blur-sm, .bg-slate-900\/60 {
+    display: none !important;
+  }
+  
+  .max-w-7xl {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .overflow-hidden, .overflow-y-auto {
+    overflow: visible !important;
+  }
+
+  .h-full {
+    height: auto !important;
+  }
+
+  /* Professional report header */
+  .print-header {
+    display: block !important;
+    border-bottom: 2px solid #000;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  /* Force light backgrounds for readability */
+  .bg-slate-50, .bg-slate-100, .bg-white {
+    background: white !important;
+  }
+
+  .border, .border-slate-200 {
+    border-color: #eee !important;
+  }
+
+  /* Vital signs chart printing */
+  .recharts-responsive-container {
+    height: 300px !important;
+  }
+}
+

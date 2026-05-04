@@ -4,22 +4,27 @@
  */
 
 import React from 'react';
-import { Search, Filter, MoreVertical, ExternalLink } from 'lucide-react';
+import { Search, Filter, MoreVertical, ExternalLink, Plus, Printer } from 'lucide-react';
 import { Patient } from '../types';
 import { cn } from '../lib/utils';
 
 interface PatientMasterListProps {
   patients: Patient[];
   onOpenPatient?: (id: string) => void;
+  onAddPatient?: () => void;
 }
 
-export const PatientMasterList: React.FC<PatientMasterListProps> = ({ patients, onOpenPatient }) => {
+export const PatientMasterList: React.FC<PatientMasterListProps> = ({ patients, onOpenPatient, onAddPatient }) => {
   const [searchTerm, setSearchTerm] = React.useState('');
 
   const filteredPatients = patients.filter(p => 
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     p.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   return (
     <div className="p-8">
@@ -30,6 +35,20 @@ export const PatientMasterList: React.FC<PatientMasterListProps> = ({ patients, 
         </div>
         
         <div className="flex items-center gap-3">
+          <button 
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all font-sans print:hidden"
+          >
+            <Printer className="text-slate-400" size={16} />
+            Print Registry
+          </button>
+          <button 
+            onClick={onAddPatient}
+            className="flex items-center gap-2 px-6 py-2 bg-brand text-white rounded-lg text-sm font-black uppercase tracking-widest shadow-lg shadow-brand/20 hover:scale-[1.02] transition-all"
+          >
+            <Plus size={18} />
+            Add Patient
+          </button>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 

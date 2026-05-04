@@ -68,6 +68,7 @@ export interface InventoryItem {
   unit: string;
   expiryDate?: string;
   status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+  lowStockThreshold?: number;
 }
 
 export interface KardexTask {

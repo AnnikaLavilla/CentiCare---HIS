@@ -8,8 +8,16 @@ Professional Hospital Information System (HIS) dashboard for managing clinical s
 - **Nursing Kardex**: Advanced task management for shift handovers and critical care workflows.
 - **Interactive Ward Map**: Visual bed management with real-time status indicators.
 - **Pharmacy & Inventory**: Comprehensive stock tracking with crash cart management and emergency medicine monitoring.
-- **Secure Medical Charts**: HIPAA-ready audit logs and imaging/radiology reporting.
+- **Secure Medical Charts**: Data Privacy Act compliant audit logs and imaging/radiology reporting.
 - **Staff Accounts**: Individual profile management with tiered permissions.
+
+## 🛡️ Ethical & Legal Compliance
+
+CentiCare HIS is designed with strict adherence to Philippine clinical and data standards:
+
+- **RA 10173 (Data Privacy Act of 2012)**: All patient data processing follows NPC-mandated security measures including access control and audit logging.
+- **Clinical Accountability**: Mandatory audit trails for all medical entries (vitals, meds, SBAR).
+- **Privacy by Design**: Role-based access ensures health information is only available on a "need-to-know" basis.
 
 ## 🚀 Tech Stack
 

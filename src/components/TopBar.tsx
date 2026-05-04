@@ -4,9 +4,10 @@
  */
 
 import React from 'react';
-import { Search, Bell, User, Settings, LogOut, HelpCircle, LifeBuoy, X, BookOpen, ExternalLink } from 'lucide-react';
+import { Search, Bell, User, Settings, LogOut, HelpCircle, LifeBuoy, X, BookOpen, ExternalLink, FileText } from 'lucide-react';
 import { User as UserType } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '../lib/utils';
 
 interface TopBarProps {
   onLogout: () => void;
@@ -17,6 +18,13 @@ export const TopBar: React.FC<TopBarProps> = ({ onLogout, onOpenAccount }) => {
   const user: UserType | null = JSON.parse(localStorage.getItem('user') || 'null');
   const [showHowDoI, setShowHowDoI] = React.useState(false);
   const [showSupport, setShowSupport] = React.useState(false);
+  const [showNotifications, setShowNotifications] = React.useState(false);
+
+  const notifications = [
+    { id: 1, title: 'STAT ORDER', message: 'Room 402 - Epinephrine 1mg', time: '2m ago', type: 'urgent' },
+    { id: 2, title: 'LOW STOCK', message: 'Adenosine vials below threshold', time: '15m ago', type: 'warning' },
+    { id: 3, title: 'MGH UPDATE', message: 'Patient #29381 cleared by Social Service', time: '1h ago', type: 'info' }
+  ];
 
   return (
     <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-40">
@@ -70,11 +78,59 @@ export const TopBar: React.FC<TopBarProps> = ({ onLogout, onOpenAccount }) => {
       </div>
 
       <div className="flex items-center gap-6">
-        <button className="text-slate-500 hover:text-brand relative">
-          <Bell size={20} />
-          <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-        </button>
-        <button className="text-slate-500 hover:text-brand">
+        <div className="relative">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="text-slate-500 hover:text-brand relative p-2 rounded-full hover:bg-slate-50 transition-all"
+          >
+            <Bell size={20} />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+          </button>
+          
+          <AnimatePresence>
+            {showNotifications && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
+                <motion.div 
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 overflow-hidden"
+                >
+                  <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Clinical Notifications</h4>
+                    <span className="text-[8px] font-black bg-brand/10 text-brand px-2 py-0.5 rounded-full uppercase">3 New</span>
+                  </div>
+                  <div className="max-h-96 overflow-y-auto">
+                    {notifications.map((n) => (
+                      <div key={n.id} className="p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer group">
+                        <div className="flex justify-between items-start mb-1">
+                          <span className={cn(
+                            "text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter",
+                            n.type === 'urgent' ? "bg-red-500 text-white animate-pulse" :
+                            n.type === 'warning' ? "bg-amber-500 text-white" : "bg-blue-500 text-white"
+                          )}>
+                            {n.title}
+                          </span>
+                          <span className="text-[8px] font-bold text-slate-400">{n.time}</span>
+                        </div>
+                        <p className="text-xs text-slate-700 font-medium group-hover:text-brand transition-colors">{n.message}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <button className="w-full p-3 text-[10px] font-black text-slate-400 hover:text-brand transition-colors uppercase tracking-widest bg-slate-50/50">
+                    Clear All Notifications
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+        
+        <button 
+          onClick={onOpenAccount}
+          className="text-slate-500 hover:text-brand p-2 rounded-full hover:bg-slate-50 transition-all"
+        >
           <Settings size={20} />
         </button>
         <div className="h-8 w-px bg-slate-200"></div>

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Search, Flame, ChevronRight, Lock, AlertCircle } from 'lucide-react';
+import { Search, Flame, ChevronRight, Lock, AlertCircle, Printer } from 'lucide-react';
 import { Patient } from '../types';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -23,6 +23,10 @@ export const EmergencyModule: React.FC<EmergencyModuleProps> = ({ patients, onOp
     p.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <div className="p-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -34,15 +38,24 @@ export const EmergencyModule: React.FC<EmergencyModuleProps> = ({ patients, onOp
           <p className="text-slate-500">Active ER cases and critical monitoring.</p>
         </div>
         
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input 
-            type="text" 
-            placeholder="Search ER patient/ID..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand outline-none w-64 shadow-sm bg-white"
-          />
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-6 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all font-sans print:hidden"
+          >
+            <Printer className="text-slate-400" size={16} />
+            Print ER Census
+          </button>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type="text" 
+              placeholder="Search ER patient/ID..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand outline-none w-64 shadow-sm bg-white"
+            />
+          </div>
         </div>
       </div>
 
